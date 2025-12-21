@@ -1,0 +1,70 @@
+alembic==1.16.5
+altair==5.5.0
+asttokens @ file:///home/conda/feedstock_root/build_artifacts/asttokens_1733250440834/work
+astunparse @ file:///home/conda/feedstock_root/build_artifacts/astunparse_1736248061654/work
+attrs==25.4.0
+blinker==1.9.0
+cachetools==6.2.4
+certifi==2025.11.12
+charset-normalizer==3.4.4
+click==8.1.8
+colorlog==6.10.1
+contourpy==1.3.0
+cycler==0.12.1
+decorator @ file:///home/conda/feedstock_root/build_artifacts/decorator_1733236420667/work
+dill @ file:///home/conda/feedstock_root/build_artifacts/dill_1744798524990/work
+fonttools==4.60.2
+gitdb==4.0.12
+GitPython==3.1.45
+greenlet==3.2.4
+idna==3.11
+importlib_resources==6.5.2
+Jinja2==3.1.6
+joblib==1.5.3
+jsonschema==4.25.1
+jsonschema-specifications==2025.9.1
+kiwisolver==1.4.7
+lazy_loader==0.4
+Mako==1.3.10
+MarkupSafe==3.0.3
+matplotlib==3.9.4
+mindspore @ https://ms-release.obs.cn-north-4.myhuaweicloud.com/2.7.1/MindSpore/unified/x86_64/mindspore-2.7.1-cp39-cp39-linux_x86_64.whl#sha256=38e9f73dcd5f8487caaef71815deabbb6cfc6eb16a5eff121df6631870ef0128
+mne==1.8.0
+narwhals==2.14.0
+numpy @ file:///home/conda/feedstock_root/build_artifacts/numpy_1707225342954/work/dist/numpy-1.26.4-cp39-cp39-linux_x86_64.whl#sha256=c799942b5898f6e6c60264d1663a6469a475290e758c654aeeb78e2596463abd
+optuna==4.6.0
+packaging @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_packaging_1745345660/work
+pandas==2.3.3
+pillow @ file:///home/conda/feedstock_root/build_artifacts/pillow_1726075067949/work
+platformdirs==4.4.0
+pooch==1.8.2
+protobuf==3.20.3
+psutil @ file:///home/conda/feedstock_root/build_artifacts/psutil_1728965148014/work
+pyarrow==21.0.0
+pydeck==0.9.1
+pyparsing==3.2.5
+python-dateutil==2.9.0.post0
+pytz==2025.2
+PyYAML @ file:///home/conda/feedstock_root/build_artifacts/pyyaml_1737454647378/work
+referencing==0.36.2
+requests==2.32.5
+rpds-py==0.27.1
+safetensors @ file:///home/conda/feedstock_root/build_artifacts/safetensors_1754674897551/work
+scikit-learn==1.6.1
+scipy @ file:///home/conda/feedstock_root/build_artifacts/scipy-split_1716470218293/work/dist/scipy-1.13.1-cp39-cp39-linux_x86_64.whl#sha256=e6696cb8683d94467891b7648e068a3970f6bc0a1b3c1aa7f9bc89458eafd2f0
+seaborn==0.13.2
+six @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_six_1753199211/work
+smmap==5.0.2
+SQLAlchemy==2.0.45
+streamlit==1.50.0
+tenacity==9.1.2
+threadpoolctl==3.6.0
+toml==0.10.2
+tomli==2.3.0
+tornado==6.5.4
+tqdm==4.67.1
+typing_extensions==4.15.0
+tzdata==2025.3
+urllib3==2.6.2
+watchdog==6.0.0
+zipp==3.23.0

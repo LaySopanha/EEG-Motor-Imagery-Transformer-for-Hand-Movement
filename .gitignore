@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+b2h_mindspore/
+
+# MindSpore / Model Files
+checkpoints/
+*.ckpt
+*.meta
+*.ckpt-*
+
+# Data
+data/
+*.edf
+*.fif
+
+# Logs
+*.log
+training_log.txt
+nohup.out
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Optuna
+optuna_study.db
+
+# Generated files
+eval_confusion_matrix.png
+best_params.json
