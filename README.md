@@ -1,3 +1,4 @@
+
 # Brain2Hand: EEG-Based Intention Decoding System
 
 **Huawei ICT Competition 2025-2026 | Cloud Track | Team B2H**
@@ -50,3 +51,6 @@ This will download the dataset (~50MB), train the model, and save checkpoints to
 - **Framework**: MindSpore
 - **Frontend**: Streamlit
 - **Data Processing**: MNE-Python, NumPy
+=======
+# EEG Motor Imagery Transformer for Hand Movement
+
