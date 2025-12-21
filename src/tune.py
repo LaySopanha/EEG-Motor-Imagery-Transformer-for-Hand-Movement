@@ -19,12 +19,12 @@ def objective(trial):
     """
     Optuna objective function: Trains model with suggested params and returns validation accuracy.
     """
-    # 1. Suggest hyperparameters
+    # 1. Suggest hyperparameters (H200 GPU optimized)
     lr = trial.suggest_float('lr', 1e-4, 1e-2, log=True)
     num_layers = trial.suggest_int('layers', 1, 4)
     dropout = trial.suggest_float('dropout', 0.1, 0.5)
-    batch_size = trial.suggest_categorical('batch_size', [4, 8, 16])
-    epochs = trial.suggest_int('epochs', 10, 50, step=10)
+    batch_size = trial.suggest_categorical('batch_size', [32, 64, 128])  # Larger for GPU
+    epochs = trial.suggest_int('epochs', 20, 100, step=20)  # More epochs for GPU speed
     
     print(f"\n[Trial {trial.number}] LR={lr:.5f}, Layers={num_layers}, Dropout={dropout:.2f}, Batch={batch_size}, Epochs={epochs}")
     
@@ -69,11 +69,12 @@ def objective(trial):
 def main():
     global X_TUNE, Y_TUNE
     
-    mindspore.set_context(mode=mindspore.GRAPH_MODE, device_target="CPU")
+    mindspore.set_context(mode=mindspore.GRAPH_MODE, device_target=config.DEVICE)
     
     print("="*60)
     print("   OPTUNA HYPERPARAMETER OPTIMIZATION")
     print("   Algorithm: Tree-structured Parzen Estimator (TPE)")
+    print(f"   Device: {config.DEVICE}")
     print("="*60)
     
     # Load data once

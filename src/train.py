@@ -101,11 +101,13 @@ def create_dataset(X, y, batch_size=2):
 
 def train():
     # 1. SETUP ENVIRONMENT
-    mindspore.set_context(mode=mindspore.GRAPH_MODE, device_target="CPU")
+    mindspore.set_context(mode=mindspore.GRAPH_MODE, device_target=config.DEVICE)
     print("\n" + "="*40)
     print("   BRAIN2HAND TRAINING SYSTEM v2.0")
     print("   Target: Hybrid CNN-Transformer")
-    print("   Device: CPU (Prototype Mode)")
+    print(f"   Device: {config.DEVICE}")
+    if config.DEVICE == "GPU":
+        print("   GPU: H200 (141GB) - Optimized")
     print("="*40 + "\n")
 
     # 2. PREPARE DATA

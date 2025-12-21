@@ -22,12 +22,16 @@ TUNE_SUBJECTS = 10  # Options: 1 (fast), 5 (balanced), len(SUBJECTS) (best but s
 # Data Locations
 DATA_DIR = "./data"
 
-# 2. TRAINING HYPERPARAMETERS
-EPOCHS = 50           # Sufficient for convergence with Scaling
-BATCH_SIZE = 8        # Increase this if you have a powerful GPU (e.g. 32 or 64)
+# 2. HARDWARE CONFIGURATION
+# Device: "CPU" or "GPU"
+DEVICE = "GPU"  # Set to "GPU" for H200 acceleration
+
+# 3. TRAINING HYPERPARAMETERS
+EPOCHS = 50           # Sufficient for convergence
+BATCH_SIZE = 64       # Increased for H200 GPU (141GB memory!)
 LEARNING_RATE = 0.001 # Default start, overriden by best_params.json if available
 
-# 3. MOCKING
+# 4. MOCKING
 # If True, generates fake data if internet is down. 
 # Set to False for real training.
 USE_MOCK_ON_FAIL = True
