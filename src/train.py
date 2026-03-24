@@ -73,6 +73,7 @@ def train():
     best_val_acc = 0.0
     patience     = 5
     wait         = 0
+    history      = {"train_loss": [], "val_acc": []}
 
     print(f"\n--- [Train] Starting {epochs} epochs ---\n")
 
@@ -95,6 +96,9 @@ def train():
         val_acc    = evaluate(model, val_loader, device)
         elapsed    = time.time() - t0
 
+        history["train_loss"].append(train_loss)
+        history["val_acc"].append(val_acc)
+
         print(f"[Epoch {epoch:>3}/{epochs}]  loss={train_loss:.4f}  val_acc={val_acc:.2%}  ({elapsed:.1f}s)")
 
         # ── Save best checkpoint ──────────────────────────────────────────────
@@ -110,6 +114,12 @@ def train():
             if wait >= patience:
                 print(f"\n[STOP] Early stopping triggered (patience={patience}).")
                 break
+
+    # ── Save training history for plotting ────────────────────────────────────
+    os.makedirs("./results", exist_ok=True)
+    with open("./results/history.json", "w") as f:
+        json.dump(history, f, indent=2)
+    print("--- [Train] History saved → ./results/history.json ---")
 
     print(f"\n{'='*50}")
     print(f"   TRAINING COMPLETE")
