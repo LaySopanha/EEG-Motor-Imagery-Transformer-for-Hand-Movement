@@ -62,6 +62,15 @@ def load_and_preprocess_data(data_dir: str = "./data", subjects: list = [1, 2], 
                 X_subj = epochs.get_data(copy=True).transpose(0, 2, 1).astype(np.float32)
                 y_subj = (epochs.events[:, -1] - 2).astype(np.int64)  # 2→0 (Left), 3→1 (Right)
 
+                # Crop or pad to fixed length so all subjects can be concatenated
+                TARGET = 641
+                T = X_subj.shape[1]
+                if T >= TARGET:
+                    X_subj = X_subj[:, :TARGET, :]
+                else:
+                    pad = np.zeros((X_subj.shape[0], TARGET - T, X_subj.shape[2]), dtype=np.float32)
+                    X_subj = np.concatenate([X_subj, pad], axis=1)
+
                 all_X.append(X_subj)
                 all_y.append(y_subj)
                 print(f"   > Subject {subject:03d}: {X_subj.shape[0]} trials")
