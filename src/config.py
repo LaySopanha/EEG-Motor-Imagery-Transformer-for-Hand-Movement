@@ -4,34 +4,31 @@
 # Change this to switch between laptop and cloud training
 MODE = "CLOUD"  # Options: "LAPTOP", "CLOUD", "FULL"
 
-# Dynamic subject selection based on MODE
 if MODE == "LAPTOP":
-    SUBJECTS = [1, 2]  # Fast, for debugging (2 subjects)
+    SUBJECTS = [1, 2]               # Fast, for debugging
 elif MODE == "CLOUD":
-    SUBJECTS = list(range(1, 26))  # Cloud training (25 subjects, ~90% accuracy)
+    SUBJECTS = list(range(1, 26))   # 25 subjects, ~90% accuracy target
 elif MODE == "FULL":
-    SUBJECTS = list(range(1, 110))  # Full PhysioNet (109 subjects, maximum accuracy)
+    SUBJECTS = list(range(1, 110))  # All 109 PhysioNet subjects
 else:
-    SUBJECTS = [1, 2]  # Default fallback
+    SUBJECTS = [1, 2]
 
-# Tuning Configuration
-# How many subjects to use for hyperparameter tuning (subset of SUBJECTS)
-# Lower = Faster tuning, Higher = Better hyperparameters
-TUNE_SUBJECTS = 10  # Options: 1 (fast), 5 (balanced), len(SUBJECTS) (best but slow)
+# How many subjects to use during hyperparameter tuning (subset of SUBJECTS)
+TUNE_SUBJECTS = 5  # Lower = faster; higher = better params
 
-# Data Locations
+# Data location
 DATA_DIR = "./data"
 
-# 2. HARDWARE CONFIGURATION
-# Device: "CPU" or "GPU"
-DEVICE = "GPU"  # Set to "GPU" for H200 acceleration
+# 2. HARDWARE
+# "cpu" or "cuda" (Lightning AI GPU)
+DEVICE = "cuda"
 
-# 3. TRAINING HYPERPARAMETERS
-EPOCHS = 50           # Sufficient for convergence
-BATCH_SIZE = 64       # Increased for H200 GPU (141GB memory!)
-LEARNING_RATE = 0.001 # Default start, overriden by best_params.json if available
+# 3. TRAINING HYPERPARAMETERS (defaults; overridden by best_params.json if available)
+EPOCHS       = 50
+BATCH_SIZE   = 64
+LEARNING_RATE = 0.001
 
-# 4. MOCKING
-# If True, generates fake data if internet is down. 
-# Set to False for real training.
-USE_MOCK_ON_FAIL = True
+# 4. MISC
+USE_MOCK_ON_FAIL = True  # Fall back to random data if download fails
+CHECKPOINT_PATH  = "./checkpoints/brain2hand.pt"
+BEST_PARAMS_PATH = "./best_params.json"

@@ -1,96 +1,73 @@
+import os
 import numpy as np
-import mindspore
-from mindspore import Tensor, load_checkpoint, load_param_into_net
-import mindspore.ops as ops
+import torch
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from dataset import load_and_preprocess_data
-from model import HybridBrainTransformer
 import config
+from dataset import load_and_preprocess_data, EEGDataset
+from model import HybridBrainTransformer
+from torch.utils.data import DataLoader
+
 
 def evaluate():
-    print("--- [Eval] Standard Evaluation Protocol 1.0 ---")
-    
-    # 1. Load Data (Same Subjects as Train for consistency, or new for cross-subject)
-    # Using Subjects from Config ensures we evaluate what we defined
-    # CRITICAL: Do NOT augment Eval data! We want to test on real signals, not noisy ones.
-    print(f"--- [Eval] Using Subjects: {config.SUBJECTS} ---")
-    X, y = load_and_preprocess_data(subjects=config.SUBJECTS, augment=False)
-    
-    # We will evaluate on the *entire* set to get a comprehensive report, 
-    # or you could manually slice for the hold-out set if you fixed the seed.
-    # For this script, evaluating the full dataset provides the "System Performance" overview.
-    
-    # 2. Load Model
-    # Automagically detect the trained architecture
-    import json
-    try:
-        with open("best_params.json", "r") as f:
-            content = f.read().replace("'", '"')
-            best_params = json.loads(content)
-        NUM_LAYERS = int(best_params.get('layers', 2))
-        print(f"--- [Eval] Detected Trained Architecture: Layers={NUM_LAYERS} ---")
-    except:
-        NUM_LAYERS = 2 # Default fallback
-        print(f"--- [Eval] Warning: Could not load best_params.json. Defaulting to Layers=2 ---")
+    device = torch.device(config.DEVICE if torch.cuda.is_available() else "cpu")
+    print("\n--- [Eval] Brain2Hand Evaluation ---")
+    print(f"--- [Eval] Device : {device} ---")
 
-    net = HybridBrainTransformer(input_dim=64, num_layers=NUM_LAYERS) 
-    ckpt_path = "./checkpoints/brain2hand-hybrid.ckpt"
-    
-    try:
-        param_dict = load_checkpoint(ckpt_path)
-        load_param_into_net(net, param_dict)
-        print(f"--- [Eval] Loaded Model: {ckpt_path} ---")
-    except Exception as e:
-        print(f"[Results] Error loading model: {e}")
+    # ── 1. Load data (no augmentation — test on clean signals only) ───────────
+    print(f"--- [Eval] Subjects: {config.SUBJECTS} ---")
+    X, y = load_and_preprocess_data(data_dir=config.DATA_DIR, subjects=config.SUBJECTS, augment=False)
+    dataset = EEGDataset(X, y)
+    loader  = DataLoader(dataset, batch_size=128, shuffle=False, num_workers=0)
+
+    # ── 2. Load model ─────────────────────────────────────────────────────────
+    if not os.path.exists(config.CHECKPOINT_PATH):
+        print(f"[ERROR] No checkpoint found at {config.CHECKPOINT_PATH}. Run train.py first.")
         return
 
-    net.set_train(False)
+    ckpt       = torch.load(config.CHECKPOINT_PATH, map_location=device)
+    num_layers = ckpt.get("num_layers", 2)
+    dropout    = ckpt.get("dropout",    0.3)
 
-    print("--- [Eval] Running Inference... ---")
-    
-    # Batch processing to avoid memory issues if dataset is massive (optional for this size)
-    # Simple loop for prototype:
-    preds = []
-    
-    # Inference Loop
-    for i in range(len(X)):
-        input_tensor = Tensor(np.expand_dims(X[i], axis=0), mindspore.float32)
-        logits = net(input_tensor)
-        prob = ops.Softmax(axis=1)(logits).asnumpy()[0]
-        pred_label = np.argmax(prob)
-        preds.append(pred_label)
-        
-        if i % 50 == 0:
-            print(f"   > Processed {i}/{len(X)} samples...")
+    model = HybridBrainTransformer(num_layers=num_layers, dropout=dropout).to(device)
+    model.load_state_dict(ckpt["model_state"])
+    model.eval()
+    print(f"--- [Eval] Loaded checkpoint (epoch {ckpt.get('epoch','?')}, val_acc={ckpt.get('val_acc',0):.2%}) ---")
 
-    preds = np.array(preds)
-    
-    # 3. Metrics
-    acc = accuracy_score(y, preds)
-    print(f"\n========================================")
+    # ── 3. Inference ──────────────────────────────────────────────────────────
+    all_preds, all_labels = [], []
+    with torch.no_grad():
+        for X_batch, y_batch in loader:
+            preds = model(X_batch.to(device)).argmax(dim=1).cpu().numpy()
+            all_preds.extend(preds)
+            all_labels.extend(y_batch.numpy())
+
+    preds  = np.array(all_preds)
+    labels = np.array(all_labels)
+
+    # ── 4. Metrics ────────────────────────────────────────────────────────────
+    acc = accuracy_score(labels, preds)
+    print(f"\n{'='*50}")
     print(f"   OVERALL ACCURACY: {acc:.2%}")
-    print(f"========================================")
-    
-    print("\n--- Detailed Classification Report ---")
-    print(classification_report(y, preds, target_names=['Left Hand', 'Right Hand']))
-    
-    # 4. Confusion Matrix Plot
-    cm = confusion_matrix(y, preds)
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
-                xticklabels=['Pred Left', 'Pred Right'], 
-                yticklabels=['Actual Left', 'Actual Right'])
-    plt.title('Brain2Hand Confusion Matrix')
-    plt.ylabel('True Label')
-    plt.xlabel('Predicted Label')
-    
-    save_img = "eval_confusion_matrix.png"
-    plt.savefig(save_img)
-    print(f"\n[Viz] Confusion Matrix saved to: {save_img}")
-    print("--- Evaluation Complete ---")
+    print(f"{'='*50}")
+    print("\n--- Classification Report ---")
+    print(classification_report(labels, preds, target_names=["Left Hand", "Right Hand"]))
+
+    # ── 5. Confusion matrix ───────────────────────────────────────────────────
+    cm = confusion_matrix(labels, preds)
+    plt.figure(figsize=(7, 5))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
+                xticklabels=["Pred: Left", "Pred: Right"],
+                yticklabels=["True: Left", "True: Right"])
+    plt.title(f"Brain2Hand Confusion Matrix  (Acc={acc:.2%})")
+    plt.tight_layout()
+    out_path = "eval_confusion_matrix.png"
+    plt.savefig(out_path, dpi=150)
+    print(f"\n[Viz] Confusion matrix saved → {out_path}")
+    print("--- Evaluation complete ---\n")
+
 
 if __name__ == "__main__":
     evaluate()
