@@ -116,10 +116,11 @@ def train():
                 break
 
     # ── Save training history for plotting ────────────────────────────────────
-    os.makedirs("./results", exist_ok=True)
-    with open("./results/history.json", "w") as f:
+    os.makedirs(config.RESULTS_DIR, exist_ok=True)
+    history_path = os.path.join(config.RESULTS_DIR, "history.json")
+    with open(history_path, "w") as f:
         json.dump(history, f, indent=2)
-    print("--- [Train] History saved → ./results/history.json ---")
+    print(f"--- [Train] History saved → {history_path} ---")
 
     print(f"\n{'='*50}")
     print(f"   TRAINING COMPLETE")

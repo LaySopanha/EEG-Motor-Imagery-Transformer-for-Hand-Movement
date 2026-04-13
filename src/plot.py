@@ -2,7 +2,7 @@
 Brain2Hand — Chart Generator
 Run AFTER train.py and eval.py to produce all publication-quality figures.
 
-Output files (all saved to ./results/):
+Output files (all saved to <repo_root>/results/):
   01_training_curves.png      — loss + val accuracy over epochs
   02_confusion_matrix.png     — normalised confusion matrix
   03_class_metrics.png        — precision / recall / F1 bar chart
@@ -27,7 +27,8 @@ import config
 from dataset import load_and_preprocess_data, EEGDataset
 from model import HybridBrainTransformer
 
-os.makedirs("./results", exist_ok=True)
+RESULTS_DIR = config.RESULTS_DIR
+os.makedirs(RESULTS_DIR, exist_ok=True)
 
 STYLE  = "seaborn-v0_8-whitegrid"
 COLORS = {"left": "#3B82F6", "right": "#EF4444", "loss": "#6366F1", "acc": "#10B981"}
@@ -39,7 +40,9 @@ plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 11})
 # 1. Training Curves
 # ─────────────────────────────────────────────────────────────────────────────
 
-def plot_training_curves(history_path: str = "./results/history.json"):
+def plot_training_curves(history_path: str = None):
+    if history_path is None:
+        history_path = os.path.join(RESULTS_DIR, "history.json")
     with open(history_path) as f:
         h = json.load(f)
 
@@ -73,7 +76,7 @@ def plot_training_curves(history_path: str = "./results/history.json"):
 
         fig.suptitle("Brain2Hand — Training Progress", fontsize=14, fontweight="bold", y=1.02)
         plt.tight_layout()
-        out = "./results/01_training_curves.png"
+        out = os.path.join(RESULTS_DIR, "01_training_curves.png")
         plt.savefig(out, dpi=150, bbox_inches="tight")
         plt.close()
         print(f"[✓] Saved {out}")
@@ -138,7 +141,7 @@ def plot_confusion_matrix(labels, preds):
         fig.suptitle(f"Brain2Hand Classification Results  |  Overall Accuracy: {acc:.2%}",
                      fontsize=13, fontweight="bold")
         plt.tight_layout()
-        out = "./results/02_confusion_matrix.png"
+        out = os.path.join(RESULTS_DIR, "02_confusion_matrix.png")
         plt.savefig(out, dpi=150, bbox_inches="tight")
         plt.close()
         print(f"[✓] Saved {out}")
@@ -169,7 +172,7 @@ def plot_class_metrics(labels, preds):
             ax.text(i + width, fi * 100 + 1.5, f"{fi:.0%}", ha="center", fontsize=9)
 
         plt.tight_layout()
-        out = "./results/03_class_metrics.png"
+        out = os.path.join(RESULTS_DIR, "03_class_metrics.png")
         plt.savefig(out, dpi=150, bbox_inches="tight")
         plt.close()
         print(f"[✓] Saved {out}")
@@ -193,7 +196,7 @@ def plot_roc_curve(labels, probs):
         ax.set_ylim(0, 1.05)
 
         plt.tight_layout()
-        out = "./results/04_roc_curve.png"
+        out = os.path.join(RESULTS_DIR, "04_roc_curve.png")
         plt.savefig(out, dpi=150, bbox_inches="tight")
         plt.close()
         print(f"[✓] Saved {out}")
@@ -232,7 +235,7 @@ def plot_eeg_sample():
 
         fig.suptitle("EEG Signal Epochs — 8–30 Hz Filtered (Mu/Beta Band)", fontsize=13, fontweight="bold")
         plt.tight_layout()
-        out = "./results/05_eeg_sample.png"
+        out = os.path.join(RESULTS_DIR, "05_eeg_sample.png")
         plt.savefig(out, dpi=150, bbox_inches="tight")
         plt.close()
         print(f"[✓] Saved {out}")
@@ -257,4 +260,4 @@ if __name__ == "__main__":
     print("→ [5/5] EEG signal sample...")
     plot_eeg_sample()
 
-    print("\n=== All charts saved to ./results/ ===")
+    print(f"\n=== All charts saved to {RESULTS_DIR} ===")

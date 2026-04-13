@@ -1,5 +1,11 @@
 # --- BRAIN2HAND CENTRAL CONFIGURATION ---
 
+from pathlib import Path
+
+# Repo root, computed from this file's location.
+# All other paths are anchored here so scripts work regardless of CWD.
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
 # 1. DATASET SCALING MODE
 # Change this to switch between laptop and cloud training
 MODE = "FULL"  # Options: "LAPTOP", "CLOUD", "FULL"
@@ -17,7 +23,7 @@ else:
 TUNE_SUBJECTS = 10  # Lower = faster; higher = better params
 
 # Data location
-DATA_DIR = "./data"
+DATA_DIR = str(REPO_ROOT / "data")
 
 # 2. HARDWARE
 # "cpu" or "cuda" (Lightning AI GPU)
@@ -30,5 +36,6 @@ LEARNING_RATE = 0.001
 
 # 4. MISC
 USE_MOCK_ON_FAIL = True  # Fall back to random data if download fails
-CHECKPOINT_PATH  = "./checkpoints/brain2hand.pt"
-BEST_PARAMS_PATH = "./best_params.json"
+CHECKPOINT_PATH  = str(REPO_ROOT / "checkpoints" / "brain2hand.pt")
+BEST_PARAMS_PATH = str(REPO_ROOT / "best_params.json")
+RESULTS_DIR      = str(REPO_ROOT / "results")

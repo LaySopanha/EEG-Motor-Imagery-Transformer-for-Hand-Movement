@@ -1,9 +1,7 @@
 import os
 import numpy as np
 import torch
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-import matplotlib.pyplot as plt
-import seaborn as sns
+from sklearn.metrics import accuracy_score, classification_report
 
 import config
 from dataset import load_and_preprocess_data, EEGDataset
@@ -54,18 +52,7 @@ def evaluate():
     print(f"{'='*50}")
     print("\n--- Classification Report ---")
     print(classification_report(labels, preds, target_names=["Left Hand", "Right Hand"]))
-
-    # ── 5. Confusion matrix ───────────────────────────────────────────────────
-    cm = confusion_matrix(labels, preds)
-    plt.figure(figsize=(7, 5))
-    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
-                xticklabels=["Pred: Left", "Pred: Right"],
-                yticklabels=["True: Left", "True: Right"])
-    plt.title(f"Brain2Hand Confusion Matrix  (Acc={acc:.2%})")
-    plt.tight_layout()
-    out_path = "eval_confusion_matrix.png"
-    plt.savefig(out_path, dpi=150)
-    print(f"\n[Viz] Confusion matrix saved → {out_path}")
+    print("\n[Note] For confusion matrix and other plots, run: python src/plot.py")
     print("--- Evaluation complete ---\n")
 
 
