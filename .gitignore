@@ -48,5 +48,6 @@ Thumbs.db
 # Optuna
 optuna_study.db
 
-
-
+# Old Huawei competition docs (superseded by ARA submission)
+docs/Brain2hand-context.md
+docs/entry-information-submission.md
