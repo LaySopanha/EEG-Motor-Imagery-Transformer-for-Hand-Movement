@@ -21,9 +21,13 @@ class EEGDataset(Dataset):
 
 # ── Main data loading function ────────────────────────────────────────────────
 
-def load_and_preprocess_data(data_dir: str = "./data", subjects: list = [1, 2], augment: bool = True):
+def load_and_preprocess_data(data_dir: str = "./data", subjects: list = [1, 2]):
     """
     Loads PhysioNet EEG motor imagery data for the given subjects.
+
+    Returns raw, unaugmented epochs. Augmentation is applied later inside
+    make_loaders, which only augments the train fold (never the val fold)
+    to keep evaluation honest.
 
     Returns
     -------
@@ -96,10 +100,6 @@ def load_and_preprocess_data(data_dir: str = "./data", subjects: list = [1, 2], 
 
     print(f"--- [Data] Raw shape: {X.shape}  |  Classes: {np.bincount(y)} ---")
 
-    if augment:
-        X, y = _augment(X, y)
-        print(f"--- [Data] Augmented shape: {X.shape} ---")
-
     return X, y
 
 
@@ -130,14 +130,40 @@ def _augment(X: np.ndarray, y: np.ndarray, noise_level: float = 0.05, shift_max:
 
 # ── DataLoader factory ────────────────────────────────────────────────────────
 
-def make_loaders(X: np.ndarray, y: np.ndarray, batch_size: int = 64, val_split: float = 0.2):
-    """Returns (train_loader, val_loader)."""
+def make_loaders(
+    X: np.ndarray,
+    y: np.ndarray,
+    batch_size: int = 64,
+    val_split: float = 0.2,
+    augment_train: bool = True,
+    seed: int = 42,
+):
+    """
+    Returns (train_loader, val_loader) with a properly isolated split:
+
+    1. Shuffle X, y with a seeded RNG so the same call from train.py and
+       plot.py produces the same train/val partition (no leakage).
+    2. Split into train/val BEFORE augmentation.
+    3. Augment only the train fold (when augment_train=True). The val fold
+       is always clean, original samples — this is the honest evaluation set.
+    """
+    rng = np.random.default_rng(seed)
+    indices = rng.permutation(len(X))
     split = int(len(X) * (1 - val_split))
-    train_ds = EEGDataset(X[:split], y[:split])
-    val_ds   = EEGDataset(X[split:], y[split:])
+    train_idx, val_idx = indices[:split], indices[split:]
+
+    X_train, y_train = X[train_idx], y[train_idx]
+    X_val,   y_val   = X[val_idx],   y[val_idx]
+
+    if augment_train:
+        X_train, y_train = _augment(X_train, y_train)
+
+    train_ds = EEGDataset(X_train, y_train)
+    val_ds   = EEGDataset(X_val,   y_val)
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True,  num_workers=0, pin_memory=True)
     val_loader   = DataLoader(val_ds,   batch_size=batch_size, shuffle=False, num_workers=0, pin_memory=True)
-    print(f"--- [Data] Train: {len(train_ds)} samples | Val: {len(val_ds)} samples ---")
+    aug_note = "augmented 3x" if augment_train else "raw"
+    print(f"--- [Data] Train: {len(train_ds)} samples ({aug_note}) | Val: {len(val_ds)} samples (clean) ---")
     return train_loader, val_loader
 
 
@@ -146,3 +172,4 @@ if __name__ == "__main__":
     train_loader, val_loader = make_loaders(X, y)
     xb, yb = next(iter(train_loader))
     print(f"Batch X: {xb.shape}, y: {yb.shape}")
+

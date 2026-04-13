@@ -16,7 +16,7 @@ def evaluate():
 
     # ── 1. Load data (no augmentation — test on clean signals only) ───────────
     print(f"--- [Eval] Subjects: {config.SUBJECTS} ---")
-    X, y = load_and_preprocess_data(data_dir=config.DATA_DIR, subjects=config.SUBJECTS, augment=False)
+    X, y = load_and_preprocess_data(data_dir=config.DATA_DIR, subjects=config.SUBJECTS)
     dataset = EEGDataset(X, y)
     loader  = DataLoader(dataset, batch_size=128, shuffle=False, num_workers=0)
 

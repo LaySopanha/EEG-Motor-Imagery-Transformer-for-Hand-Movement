@@ -21,10 +21,8 @@ from sklearn.metrics import (
     confusion_matrix, classification_report,
     roc_curve, auc, precision_recall_fscore_support,
 )
-from torch.utils.data import DataLoader
-
 import config
-from dataset import load_and_preprocess_data, EEGDataset
+from dataset import load_and_preprocess_data, make_loaders
 from model import HybridBrainTransformer
 
 RESULTS_DIR = config.RESULTS_DIR
@@ -87,13 +85,21 @@ def plot_training_curves(history_path: str = None):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _run_inference():
+    """
+    Evaluates the trained model on the SAME held-out validation fold that
+    train.py used (seed=42, val_split=0.2). The val fold contains only
+    clean, non-augmented samples — no overlap with training data.
+    """
     device = torch.device(config.DEVICE if torch.cuda.is_available() else "cpu")
 
-    X, y = load_and_preprocess_data(data_dir=config.DATA_DIR, subjects=config.SUBJECTS, augment=False)
-    loader = DataLoader(EEGDataset(X, y), batch_size=128, shuffle=False, num_workers=0)
+    X, y = load_and_preprocess_data(data_dir=config.DATA_DIR, subjects=config.SUBJECTS)
 
-    ckpt       = torch.load(config.CHECKPOINT_PATH, map_location=device)
-    model      = HybridBrainTransformer(
+    # Reproduce train.py's exact split. augment_train=False because we don't
+    # need the augmented train fold here — just the clean val fold.
+    _, val_loader = make_loaders(X, y, batch_size=128, augment_train=False, seed=42)
+
+    ckpt  = torch.load(config.CHECKPOINT_PATH, map_location=device)
+    model = HybridBrainTransformer(
         num_layers=ckpt.get("num_layers", 2),
         dropout=ckpt.get("dropout", 0.3),
     ).to(device)
@@ -102,7 +108,7 @@ def _run_inference():
 
     all_preds, all_probs, all_labels = [], [], []
     with torch.no_grad():
-        for X_b, y_b in loader:
+        for X_b, y_b in val_loader:
             logits = model(X_b.to(device))
             probs  = torch.softmax(logits, dim=1).cpu().numpy()
             preds  = logits.argmax(dim=1).cpu().numpy()
@@ -207,7 +213,7 @@ def plot_roc_curve(labels, probs):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def plot_eeg_sample():
-    X, y = load_and_preprocess_data(data_dir=config.DATA_DIR, subjects=[1], augment=False)
+    X, y = load_and_preprocess_data(data_dir=config.DATA_DIR, subjects=[1])
 
     idx_left  = np.where(y == 0)[0][0]
     idx_right = np.where(y == 1)[0][0]

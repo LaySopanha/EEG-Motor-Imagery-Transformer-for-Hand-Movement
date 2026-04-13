@@ -42,7 +42,7 @@ def objective(trial: optuna.Trial) -> float:
     print(f"\n[Trial {trial.number}]  lr={lr:.5f}  layers={num_layers}  "
           f"dropout={dropout:.2f}  batch={batch_size}  epochs={epochs}")
 
-    train_loader, val_loader = make_loaders(_X, _y, batch_size=batch_size)
+    train_loader, val_loader = make_loaders(_X, _y, batch_size=batch_size, augment_train=True)
 
     model     = HybridBrainTransformer(num_layers=num_layers, dropout=dropout).to(_DEVICE)
     criterion = nn.CrossEntropyLoss()
@@ -80,7 +80,7 @@ def main():
     print("=" * 60)
 
     tune_subjects = config.SUBJECTS[: config.TUNE_SUBJECTS]
-    _X, _y = load_and_preprocess_data(data_dir=config.DATA_DIR, subjects=tune_subjects, augment=True)
+    _X, _y = load_and_preprocess_data(data_dir=config.DATA_DIR, subjects=tune_subjects)
     print(f"--- [Data] {len(_X)} samples for tuning ---\n")
 
     study = optuna.create_study(

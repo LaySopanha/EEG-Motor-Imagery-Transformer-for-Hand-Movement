@@ -15,7 +15,7 @@ def run_visual_demo():
 
     device = torch.device(config.DEVICE if torch.cuda.is_available() else "cpu")
 
-    X, y = load_and_preprocess_data(subjects=[1], augment=False)
+    X, y = load_and_preprocess_data(subjects=[1])
 
     ckpt_path = config.CHECKPOINT_PATH
     if os.path.exists(ckpt_path):

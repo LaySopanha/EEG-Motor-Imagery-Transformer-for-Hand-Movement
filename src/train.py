@@ -55,8 +55,8 @@ def train():
     epochs     = int  (params.get("epochs",     config.EPOCHS))
 
     # ── 2. Data ───────────────────────────────────────────────────────────────
-    X, y = load_and_preprocess_data(data_dir=config.DATA_DIR, subjects=config.SUBJECTS, augment=True)
-    train_loader, val_loader = make_loaders(X, y, batch_size=batch_size)
+    X, y = load_and_preprocess_data(data_dir=config.DATA_DIR, subjects=config.SUBJECTS)
+    train_loader, val_loader = make_loaders(X, y, batch_size=batch_size, augment_train=True)
 
     # ── 3. Model ──────────────────────────────────────────────────────────────
     model = HybridBrainTransformer(num_layers=num_layers, dropout=dropout).to(device)

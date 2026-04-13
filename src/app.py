@@ -121,7 +121,7 @@ def load_model():
 
 @st.cache_data
 def get_data():
-    return load_and_preprocess_data(subjects=[1], augment=False)
+    return load_and_preprocess_data(subjects=[1])
 
 
 def main():
