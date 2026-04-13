@@ -48,6 +48,5 @@ Thumbs.db
 # Optuna
 optuna_study.db
 
-# Generated files
-eval_confusion_matrix.png
-best_params.json
+
+

@@ -2,7 +2,7 @@
 
 # 1. DATASET SCALING MODE
 # Change this to switch between laptop and cloud training
-MODE = "CLOUD"  # Options: "LAPTOP", "CLOUD", "FULL"
+MODE = "FULL"  # Options: "LAPTOP", "CLOUD", "FULL"
 
 if MODE == "LAPTOP":
     SUBJECTS = [1, 2]               # Fast, for debugging
@@ -14,7 +14,7 @@ else:
     SUBJECTS = [1, 2]
 
 # How many subjects to use during hyperparameter tuning (subset of SUBJECTS)
-TUNE_SUBJECTS = 5  # Lower = faster; higher = better params
+TUNE_SUBJECTS = 10  # Lower = faster; higher = better params
 
 # Data location
 DATA_DIR = "./data"
@@ -25,7 +25,7 @@ DEVICE = "cuda"
 
 # 3. TRAINING HYPERPARAMETERS (defaults; overridden by best_params.json if available)
 EPOCHS       = 50
-BATCH_SIZE   = 64
+BATCH_SIZE   = 256
 LEARNING_RATE = 0.001
 
 # 4. MISC
