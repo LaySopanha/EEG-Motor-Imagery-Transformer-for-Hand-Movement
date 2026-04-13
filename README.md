@@ -182,17 +182,7 @@ best_params.json  Optuna-tuned hyperparameters
 
 ---
 
-## 8. Research Roadmap
-
-| Phase | Timeline | Deliverables |
-|---|---|---|
-| **Phase 1 — Complete** | Done | 97.37% accuracy on full 109-subject PhysioNet dataset. Optuna-tuned. Open-source PyTorch codebase. Cloud GPU training pipeline operational. |
-| **Phase 2** | Next 12 months | CADT IRB approval. **20–50 Cambodian volunteer subjects** for live EEG data collection — *the first open motor imagery dataset from Southeast Asian subjects*. Cross-cultural validation results submitted for peer review. |
-| **Phase 3** | Years 2–3 | Cambodian EEG dataset published open-access. 2–3 rehabilitation clinic deployments through NGO partnerships. Khmer-language interface. Target publication: IEEE TNSRE or ICASSP. SaaS/API research access layer for other ASEAN institutions. |
-
----
-
-## 9. Outreach — From Digital Accessibility to Neural Accessibility
+## 8. Outreach — From Digital Accessibility to Neural Accessibility
 
 Our outreach is built on **[Alt-Access](https://altaccess.site)** — an existing digital accessibility campaign **co-founded by team lead Lay Sopanha**, backed by the EU, IMS, and Impact Hub (2025–26). We are not designing an outreach plan from scratch; we are **reframing a campaign with proven reach** as *"From Digital Accessibility to Neural Accessibility."*
 
@@ -216,7 +206,7 @@ Our outreach is built on **[Alt-Access](https://altaccess.site)** — an existin
 
 ---
 
-## 10. Team
+## 9. Team
 
 - **Lay Sopanha** — Team Lead — sopanha.lay@student.cadt.edu.kh
   Research internships at IDRI (CADT) and DGIST Korea. Published Transformer paper (ACET 2025). Deployed HPC Kubernetes cluster at CADT. Co-founder of Alt-Access (EU/IMS/Impact Hub).
@@ -225,27 +215,6 @@ Our outreach is built on **[Alt-Access](https://altaccess.site)** — an existin
 
 Cambodia Academy of Digital Technology (CADT), Phnom Penh, Cambodia.
 
----
-
-## 11. Research Stakeholders
-
-| Group | Composition |
-|---|---|
-| **Research subjects** | Landmine amputees, stroke survivors, spinal cord injury patients, ALS patients, cerebral palsy patients (ages 15–70, rural and urban Cambodia). CADT IRB approval and informed consent required. |
-| **Research partners** | CDPO, Exceed Worldwide, CBM Global, rehabilitation clinics, IDRI (CADT), DGIST Korea, Alt-Access (EU/IMS/Impact Hub). |
-| **Institutional alignment** | MoSAVY, CMAC, MPTC, WHO SEARO. CADT operates under MPTC, providing direct alignment with Cambodia's Digital Economy Master Plan 2035. |
-
----
-
-## 12. Ethics and Cost
-
-- **EEG headset:** ~USD 500 (OpenBCI Cyton). No surgical implants.
-- **Retraining cost:** USD 10–50/run on Lightning AI for 109 subjects.
-- **Deployment:** Standard CPU at <50 ms — no GPU required at the patient end.
-- **IRB:** CADT institutional review board approval required before any human data collection.
-- **Privacy:** EEG signals carry no biometric identity. Open codebase enables independent audit.
-
----
 
 ## Full Written Proposal
 
