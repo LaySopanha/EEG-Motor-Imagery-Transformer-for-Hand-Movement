@@ -1,102 +1,89 @@
-import mindspore
-import mindspore.nn as nn
-from mindspore import Tensor, load_checkpoint, load_param_into_net
-import numpy as np
-import matplotlib.pyplot as plt
+import os
 import time
+import numpy as np
+import torch
+import torch.nn.functional as F
+import matplotlib.pyplot as plt
 
-# Import your modules
+import config
 from dataset import load_and_preprocess_data
-from model import Brain2HandTransformer
+from model import HybridBrainTransformer
 
-# --- CONFIGURATION ---
-# UPDATE THIS with the actual filename in your checkpoints folder!
-CKPT_FILE = "./checkpoints/brain2hand-10_4.ckpt" 
 
 def run_visual_demo():
     print("--- [Demo] Initializing Brain2Hand Simulation ---")
-    
-    # 1. Load the Data (Simulating a user thinking)
-    # We take the first few samples to "replay"
-    X, y = load_and_preprocess_data(subject=1)
-    
-    # 2. Load the Model
-    net = Brain2HandTransformer(input_dim=64, num_layers=2)
-    
-    # Load trained weights
-    try:
-        param_dict = load_checkpoint(CKPT_FILE)
-        load_param_into_net(net, param_dict)
-        print(f"--- [Demo] Model weights loaded from {CKPT_FILE} ---")
-    except Exception as e:
-        print(f"Warning: Could not load checkpoint ({e}). Running with random weights for demo.")
 
-    net.set_train(False) # Evaluation mode
+    device = torch.device(config.DEVICE if torch.cuda.is_available() else "cpu")
 
-    # 3. SETUP VISUALIZATION
-    plt.ion() # Interactive mode on
+    X, y = load_and_preprocess_data(subjects=[1], augment=False)
+
+    ckpt_path = config.CHECKPOINT_PATH
+    if os.path.exists(ckpt_path):
+        ckpt = torch.load(ckpt_path, map_location=device)
+        num_layers = ckpt.get("num_layers", 2)
+        dropout = ckpt.get("dropout", 0.3)
+        model = HybridBrainTransformer(num_layers=num_layers, dropout=dropout).to(device)
+        model.load_state_dict(ckpt["model_state"])
+        print(f"--- [Demo] Model weights loaded from {ckpt_path} ---")
+    else:
+        model = HybridBrainTransformer(num_layers=2, dropout=0.3).to(device)
+        print(f"Warning: No checkpoint at {ckpt_path}. Running with random weights.")
+
+    model.eval()
+
+    plt.ion()
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
-    fig.suptitle('Brain2Hand: Real-Time MindSpore Inference', fontsize=16, fontweight='bold')
+    fig.suptitle("Brain2Hand: Real-Time PyTorch Inference", fontsize=16, fontweight="bold")
 
-    classes = ['Left Hand', 'Right Hand'] # Labels 0 and 1
-    
+    classes = ["Left Hand", "Right Hand"]
+
     print("--- [Demo] Starting Simulation Loop... (Press Ctrl+C to stop) ---")
 
-    # Loop through samples to simulate a continuous stream
     for i in range(len(X)):
-        # Get one sample (1 trial)
-        # Shape: (1, Time, Channels)
-        input_tensor = Tensor(np.expand_dims(X[i], axis=0), mindspore.float32)
-        true_label = classes[y[i]]
+        input_tensor = torch.from_numpy(X[i:i+1]).float().to(device)
+        true_label = classes[int(y[i])]
 
-        # INFERENCE (The AI part)
-        logits = net(input_tensor)
-        probs =  mindspore.ops.Softmax(axis=1)(logits)
-        probs_np = probs.asnumpy()[0] # e.g., [0.8, 0.2]
-        
-        # Determine Prediction
-        pred_idx = np.argmax(probs_np)
+        with torch.no_grad():
+            logits = model(input_tensor)
+            probs_np = F.softmax(logits, dim=1).cpu().numpy()[0]
+
+        pred_idx = int(np.argmax(probs_np))
         prediction = classes[pred_idx]
         confidence = probs_np[pred_idx] * 100
 
-        # --- UPDATE PLOTS ---
         ax1.clear()
         ax2.clear()
 
-        # Plot 1: The EEG Signal (Show just one channel, e.g., C3 sensor)
-        # We plot the first 200 time steps to make it look like a wave
-        raw_wave = X[i, :200, 0] 
-        ax1.plot(raw_wave, color='#0077BE')
+        raw_wave = X[i, :200, 0]
+        ax1.plot(raw_wave, color="#0077BE")
         ax1.set_title(f"Live EEG Stream (Sensor C3) - User Intention: {true_label}", fontsize=12)
-        ax1.set_ylim([-3, 3]) # Fixed scale to stop jumping
+        ax1.set_ylim([-3, 3])
         ax1.set_ylabel("Amplitude (uV)")
         ax1.grid(True, alpha=0.3)
 
-        # Plot 2: The Model Decision (Bar Chart)
-        bars = ax2.bar(classes, probs_np, color=['#FF6B6B', '#4ECDC4'])
+        bars = ax2.bar(classes, probs_np, color=["#FF6B6B", "#4ECDC4"])
         ax2.set_ylim([0, 1])
-        ax2.set_title(f"MindSpore Prediction: {prediction.upper()} ({confidence:.1f}%)", fontsize=14)
+        ax2.set_title(f"Brain2Hand Prediction: {prediction.upper()} ({confidence:.1f}%)", fontsize=14)
         ax2.set_ylabel("Confidence")
-        
-        # Add labels on bars
+
         for bar in bars:
             height = bar.get_height()
-            ax2.text(bar.get_x() + bar.get_width()/2., height,
-                    f'{height:.2f}', ha='center', va='bottom')
+            ax2.text(bar.get_x() + bar.get_width() / 2., height,
+                     f"{height:.2f}", ha="center", va="bottom")
 
-        # Highlight the decision
         if prediction == "Left Hand":
-            fig.patch.set_facecolor('#fff5f5') # Reddish tint
+            fig.patch.set_facecolor("#fff5f5")
         else:
-            fig.patch.set_facecolor('#f0fffa') # Greenish tint
+            fig.patch.set_facecolor("#f0fffa")
 
         plt.draw()
-        plt.pause(2) # Pause for 2 seconds to let the viewer see the result
-        
+        plt.pause(2)
+
         print(f"Sample {i}: True={true_label}, Pred={prediction}, Conf={confidence:.1f}%")
 
     plt.ioff()
     plt.show()
+
 
 if __name__ == "__main__":
     run_visual_demo()
