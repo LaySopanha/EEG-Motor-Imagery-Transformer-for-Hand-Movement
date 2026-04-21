@@ -209,7 +209,7 @@ Our outreach is built on **[Alt-Access](https://altaccess.site)** — an existin
 ## 9. Team
 
 - **Lay Sopanha** — Team Lead — sopanha.lay@student.cadt.edu.kh
-  Research internships at IDRI (CADT) and DGIST Korea. Published Transformer paper (ACET 2025). Deployed HPC Kubernetes cluster at CADT. Co-founder of Alt-Access (EU/IMS/Impact Hub).
+  Research internships at IDRI (CADT) and DGIST Korea. Published Transformer paper (ACET 2025). Co-founder of Alt-Access (EU/IMS/Impact Hub).
 - **Measrithy Nazaby** — nazaby167@gmail.com
 - **Ly Leab** — leab.ly@student.cadt.edu.kh
 
